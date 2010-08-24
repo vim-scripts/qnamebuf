@@ -1,0 +1,47 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=3217
+
+I really like qname (vimscript #2317) and qbuf (vimscript #1910) and decided that it would be nice to combine them.  The author recommended I upload under my name.
+
+Usage:
+<F4> opens a list of the current buffers, and typing a string filters the list (by default ala lustyexplorer vimscript #1890).  All filtering is case insensitive (even if using Regular Expressions).  If there are many files open goes to a simplified view (just relative buffer number, and the filename with path), when filtered enough shows more information:
+    1) Relative Buffer Number
+    2) Current Buffer (%), Alternative Buffer (#), or if it is open in a visible split (=)
+    3) File name
+    4) Buffer number
+    5) Relative file path
+
+When Open:
+    <BS> Delete last char entered
+    <C-U> Delete all entered chars
+    <M-L> Toggle between listed and unlisted buffers
+    <M-D> bdelete the selected buffer, the explorer stays open and retains cursor position
+    <M-C> Close the window containing the buffer
+    <ESC> or <F4> close the explorer
+    <CR> Open the selected file in the current window
+    <M-S> Open the selected file in a split window
+    <M-V> Open the selected file in a vert split window
+    <M-T> Open the selected file in a new tab
+    <UP> <DOWN> <LEFT> <RIGHT> navigates the selection
+    <HOME> <END> move to the first/last item
+    <M-1>, ..., <M-0> open the first, ..., tenth file in the list
+
+Note, I wanted these to be <C-...> but <C-1>...<C-0> are not real key sequences.
+
+Customization:
+    g:qnamebuf_hotkey  Set the default key to toggle qnamebuf (defaults to <F4>)
+    nmap <KEY> :call QNameBufInit(1)<cr>:~ Use regular expressions instead of the lusty file filter
+    nmap <KEY> :call QNameBufInit(X, <SIZE>)<cr>:~ Set the popup size to SIZE, defaults to 1/2 the visible lines (&lines / 2)
+
+Hints:
+I find the following mappings very useful (jump to the ith file):
+    nmap <silent> <M-1> :brewind<CR>
+    nmap <silent> <M-2> :brewind \| 1bn<CR>
+    nmap <silent> <M-3> :brewind \| 2bn<CR>
+    nmap <silent> <M-4> :brewind \| 3bn<CR>
+    nmap <silent> <M-5> :brewind \| 4bn<CR>
+    nmap <silent> <M-6> :brewind \| 5bn<CR>
+    nmap <silent> <M-7> :brewind \| 6bn<CR>
+    nmap <silent> <M-8> :brewind \| 7bn<CR>
+    nmap <silent> <M-9> :brewind \| 8bn<CR>
+    nmap <silent> <M-0> :brewind \| 9bn<CR>
+When starting the buffer the numbers are displayed and this allows consistant access.
