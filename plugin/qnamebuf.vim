@@ -8,31 +8,45 @@ if v:version < 700
 	finish
 endif
 
-if !exists("g:qnamebuf_hotkey") || g:qnamebuf_hotkey == ""
-	let g:qnamebuf_hotkey = "<F4>"
-endif
-
-exe "nmap" g:qnamebuf_hotkey ":call QNameBufInit(0)<cr>:~"
-let s:qnamebuf_hotkey = eval('"\'.g:qnamebuf_hotkey.'"')
-
 if exists("g:qnamebuf_loaded") && g:qnamebuf_loaded
 	finish
 endif
 let g:qnamebuf_loaded = 1
 
+if !exists("g:qnamebuf_hotkey") || g:qnamebuf_hotkey == ""
+	let g:qnamebuf_hotkey = "<F4>"
+endif
+
+exe "nmap" g:qnamebuf_hotkey ":call QNameBufInit(0, 0, 1, 0)<cr>:~"
+let s:qnamebuf_hotkey = eval('"\'.g:qnamebuf_hotkey.'"')
+let s:mapleader = exists('mapleader') ? mapleader : "\\"
+
 " Initialize the qnamebuf buffer
 " a:regexp If true use a regexp based matching, otherwise use a lusty style
 " a:1 If set use that size for the window, if not set use &lines / 2
+" a:2 If should use the filename only or should use filename and path
+" a:3 If should let <LocalLeader>X to be a synonym for <M-X>
 function! QNameBufInit(regexp, ...)
 	cmap ~ call QNameBufRun()<CR>:~
 	let s:pro = "Prompt: "
 	let s:cmdh = &cmdheight
 	let s:unlisted = 1 - getbufvar("%", "&buflisted")
 	let s:inp = ""
+	let s:inLeader = 0
 	let s:regexp = a:regexp
+	let s:colPrinter.trow = 0
+	let s:fileName = 1
+	let s:useLeader = 0
 	if a:0 > 0
 		let s:colPrinter.trow = a:1
-	else
+	endif
+	if a:0 > 1
+		let s:fileName = a:2
+	endif
+	if a:0 > 2
+		let s:useLeader = a:3
+	endif
+	if !s:colPrinter.trow
 		let s:colPrinter.trow = &lines / 2
 	endif
 	call s:baselist()
@@ -54,15 +68,17 @@ function! QNameBufRun()
 
 	if _key == "\<BS>"
 		let s:inp = s:inp[:-2]
+	elseif _key == s:mapleader && s:useLeader
+		let s:inLeader = 1
 	elseif _key == "\<C-U>"
 		let s:inp = ""
-	elseif _key == "\<M-L>"
+	elseif _key == "\<M-L>" || (s:inLeader && _key == "l")
 		let s:unlisted = 1 - s:unlisted
 		call s:baselist()
-	elseif _key == "\<M-D>" || _key == "\<M-C>"
+	elseif _key == "\<M-D>" || _key == "\<M-C>" || (s:inLeader && (_key == "d" || _key == "c"))
 		let _sel = s:colPrinter.sel
 		if _sel < _len && _sel >= 0
-			if _key == "\<M-D>"
+			if _key == "\<M-D>" || _key == "d"
 				exe 'bd '.s:ls[_sel][3]
 			else
 				call s:closewindow(s:ls[_sel][3])
@@ -70,21 +86,21 @@ function! QNameBufRun()
 			call s:baselist()
 			call s:build(_sel)
 		endif
-	elseif strlen(_key) == 1 && char2nr(_key) > 31
+	elseif strlen(_key) == 1 && char2nr(_key) > 31 && !s:inLeader
 		let s:inp = s:inp._key
 	endif
 
 	if _key == "\<ESC>" || _key == s:qnamebuf_hotkey
 		call QNameBufUnload()
-	elseif _key == "\<CR>" || _key == "\<M-S>" || _key == "\<M-V>" || _key == "\<M-T>"
+	elseif _key == "\<CR>" || _key == "\<M-S>" || _key == "\<M-V>" || _key == "\<M-T>" || (s:inLeader && (_key == "s" || _key == "v" || _key == "t"))
 		if _key != "\<ESC>" && _sel < _len && _sel >= 0
-			if _key == "\<M-S>"
+			if _key == "\<M-S>" || _key == "s"
 				exe "set cmdheight=".s:cmdh
 				split
-			elseif _key == "\<M-V>"
+			elseif _key == "\<M-V>" || _key == "v"
 				exe "set cmdheight=".s:cmdh
 				vert split
-			elseif _key == "\<M-T>"
+			elseif _key == "\<M-T>" || _key == "t"
 				exe "set cmdheight=".s:cmdh
 				tab split
 			endif
@@ -103,39 +119,27 @@ function! QNameBufRun()
 		let s:colPrinter.sel = 0
 	elseif _key == "\<End>"
 		let s:colPrinter.sel = _len-1
-	elseif _key == "\<M-1>" && 0 < _len " XXX Can these be collapsed?
-		call s:swb(str2nr(matchstr(s:s[0], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-2>" && 1 < _len
-		call s:swb(str2nr(matchstr(s:s[1], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-3>" && 2 < _len
-		call s:swb(str2nr(matchstr(s:s[2], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-4>" && 3 < _len
-		call s:swb(str2nr(matchstr(s:s[3], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-5>" && 4 < _len
-		call s:swb(str2nr(matchstr(s:s[4], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-6>" && 5 < _len
-		call s:swb(str2nr(matchstr(s:s[5], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-7>" && 6 < _len
-		call s:swb(str2nr(matchstr(s:s[6], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-8>" && 7 < _len
-		call s:swb(str2nr(matchstr(s:s[7], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-9>" && 8 < _len
-		call s:swb(str2nr(matchstr(s:s[8], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
-	elseif _key == "\<M-0>" && 9 < _len
-		call s:swb(str2nr(matchstr(s:s[9], '<\zs\d\+\ze>')))
-		call QNameBufUnload()
+	elseif _key == "\<M-1>" || _key == "\<M-2>" || _key == "\<M-3>" || _key == "\<M-4>" || _key == "\<M-5>" || _key == "\<M-6>" || _key == "\<M-7>" || _key == "\<M-8>" || _key == "\<M-9>" || _key == "\<M-0>" || (s:inLeader && (_key == "1" || _key == "2" || _key == "3" || _key == "4" || _key == "5" || _key == "6" || _key == "7" || _key == "8" || _key == "9" || _key == "0"))
+		let _nr = char2nr(_key) - char2nr("\<M-1>")
+		if _nr <= -120
+			let _nr = char2nr(_key) - char2nr("1")
+		endif
+		if _nr < 0 " Handle that <M-0> should be index 10
+			let _nr = 9
+		endif
+		if _nr < _len
+			call s:swb(str2nr(matchstr(s:s[_nr], '<\zs\d\+\ze>')))
+			echo _nr
+			call QNameBufUnload()
+		endif
 	else
 		call s:build(s:colPrinter.sel)
 	endif
+
+	if _key != s:mapleader && s:inLeader
+		let s:inLeader = 0
+	endif
+
 	redraws
 	call inputrestore()
 endfunc
@@ -159,7 +163,11 @@ function! s:build(sel)
 	let _align = max(map(copy(s:ls), 'len(v:val[4]) + (len(v:val[2]) ? len(v:val[2])+1 : len(v:val[2])) + len(v:val[0]) + len(v:val[1])'))
 	let i = 1
 	for _line in s:ls
-		let _name = _line[5].'/'._line[4]
+		if s:fileName
+			let _name = _line[4]
+		else
+			let _name = _line[5].'/'._line[4]
+		endif
 		if s:fmatch(tolower(_name), _cmp)
 			let _sp = i < 10 ? '  ' : ' '
 			let _fill = repeat(' ', _align - len(_line[4]) - len(_line[0]) - len(_line[1]) - len(_line[2]) + (_line[3] < 10 ? 1 : 0) - (i < 10 ? 2 : 1))

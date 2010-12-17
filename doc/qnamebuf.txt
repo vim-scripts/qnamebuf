@@ -1,0 +1,127 @@
+*qnamebuf.txt*  QuickNameBuf: A quick buffer manager
+
+Author: Matt Spear <batman900 at gmail DOT com>
+QuickNameBuf version 0.02
+
+==============================================================================
+1. Overview~
+                                                *qnamebuf-overview*
+
+I really like qname (vimscript #2317) and qbuf (vimscript #1910) and
+decided that it would be nice to combine them.  The author recommended I
+upload under my name.
+
+==============================================================================
+2. Installation ~
+                                                 *qnamebuf-installation*
+
+Extract the downloaded file in your personal |vimfiles| directory (~/.vim
+under Unix or %HOMEPATH%\vimfiles under Windows).  Restart Vim and execute:
+>
+          helptags ~/.vim/doc
+<
+==============================================================================
+2. Usage ~
+                                                 *qnamebuf-usage*
+
+<F4> opens a list of the current buffers, and typing a string filters
+the list (by default ala lustyexplorer vimscript #1890).  All filtering
+is case insensitive (even if using Regular Expressions).  If there
+are many files open goes to a simplified view (just relative buffer
+number, and the filename with path), when filtered enough shows more
+information:
+    1) Relative Buffer Number
+    2) Current Buffer (%), Alternative Buffer (#), or if it is open in a visible split (=)
+    3) File name
+    4) Buffer number
+    5) Relative file path
+
+When Open:
+    <BS>  Delete last char entered
+    <C-U> Delete all entered chars
+    <M-L> Toggle between listed and unlisted buffers
+    <M-D> Delete the selected buffer, the explorer stays open and
+          retains cursor position
+    <M-C> Close the window containing the buffer
+    <ESC> or <F4> close the explorer
+    <CR>  Open the selected file in the current window, if the file
+          is already open in a split move the cursor to that split
+    <M-S> Open the selected file in a split window
+    <M-V> Open the selected file in a vert split window
+    <M-T> Open the selected file in a new tab
+    <UP> <DOWN> <LEFT> <RIGHT> Navigate the selection
+    <HOME> <END> Move to the first/last item
+    <M-1>, ..., <M-0> Open the first, ..., tenth file in the list
+
+Note, I wanted these to be <C-...> but <C-1>...<C-0> are not real key sequences.
+
+==============================================================================
+3. Customization ~
+                                                 *qnamebuf-customization*
+
+|g:qnamebuf_hotkey| Set the default key to toggle qnamebuf (defaults to <F4>).
+
+>
+    nmap <KEY> :call QNameBufInit(REGEXP, [SIZE], [FILE_NAME_ONLY], [ALLOW_LEADER])<cr>:~
+<
+If REGEXP is true use regular expressions instead of the lusty filter.
+SIZE controls the size of the popup. Defaults to 1/2 of the visible lines
+(|&lines|/2).
+If FILE_NAME_ONLY is false then use the path and filename otherwise just use
+the filename.  Defaults to true.
+If ALLOW_LEADER is true then <LEADER>X can be used instead of <M-X> in the
+list above.  Defaults to false.
+
+==============================================================================
+4. Hints ~
+                                                 *qnamebuf-hints*
+
+I find the following mappings very useful (jump to the ith file):
+    nmap <silent> <M-1> :brewind<CR>
+    nmap <silent> <M-2> :brewind \| 1bn<CR>
+    nmap <silent> <M-3> :brewind \| 2bn<CR>
+    nmap <silent> <M-4> :brewind \| 3bn<CR>
+    nmap <silent> <M-5> :brewind \| 4bn<CR>
+    nmap <silent> <M-6> :brewind \| 5bn<CR>
+    nmap <silent> <M-7> :brewind \| 6bn<CR>
+    nmap <silent> <M-8> :brewind \| 7bn<CR>
+    nmap <silent> <M-9> :brewind \| 8bn<CR>
+    nmap <silent> <M-0> :brewind \| 9bn<CR>
+
+When starting qnamebuf the relative numbers are displayed and this allows
+consistent access.
+
+==============================================================================
+6. History~
+                                                 *qnamebuf-history*
+Version 0.02
+    - Added support for <Leader>X as a synonym for <M-X> for |guioptions|+=m users
+    - Some minor code cleanup
+Version 0.01
+    - Initial release
+
+==============================================================================
+7. Thanks~
+                                                 *qnamebuf-thanks*
+
+- Vim Devs for vim
+- Stefano for finding that <M-X> doesn't work with the menu shown and an
+  initial documentation
+- pal nart For the amazing qname and qbuf which were the inspiration and basis
+  for this
+
+==============================================================================
+8. Contact ~
+                                                 *qnamebuf-contact*
+
+If you have questions, bug reports, suggestions, etc. the author can be
+contacted at batman900 AT gmail DOT com. The latest version is available at
+http://www.vim.org/scripts/script.php?script_id=3217.  If you like the script
+please vote for it on www.vim.org.
+
+==============================================================================
+License ~
+
+This software is licensed under the MIT license.
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:

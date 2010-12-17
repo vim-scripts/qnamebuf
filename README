@@ -29,8 +29,11 @@ Note, I wanted these to be <C-...> but <C-1>...<C-0> are not real key sequences.
 
 Customization:
     g:qnamebuf_hotkey  Set the default key to toggle qnamebuf (defaults to <F4>)
-    nmap <KEY> :call QNameBufInit(1)<cr>:~ Use regular expressions instead of the lusty file filter
-    nmap <KEY> :call QNameBufInit(X, <SIZE>)<cr>:~ Set the popup size to SIZE, defaults to 1/2 the visible lines (&lines / 2)
+    nmap <KEY> :call QNameBufInit(REGEXP, [SIZE], [FILE_NAME_ONLY], [ALLOW_LEADER])<cr>:~
+If REGEXP is true use regular expressions instead of the lusty filter.
+SIZE controls the size of the popup. Defaults to 1/2 of the visible lines (|&lines|/2).
+If FILE_NAME_ONLY is false then use the path and filename otherwise just use the filename.  Defaults to true.
+If ALLOW_LEADER is true then <LEADER>X can be used as a synonym of <M-X> in the list above.  Defaults to false.
 
 Hints:
 I find the following mappings very useful (jump to the ith file):
@@ -44,4 +47,4 @@ I find the following mappings very useful (jump to the ith file):
     nmap <silent> <M-8> :brewind \| 7bn<CR>
     nmap <silent> <M-9> :brewind \| 8bn<CR>
     nmap <silent> <M-0> :brewind \| 9bn<CR>
-When starting the buffer the numbers are displayed and this allows consistant access.
+When starting qnamebuf the numbers are displayed and this allows consistant access.
