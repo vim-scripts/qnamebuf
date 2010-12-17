@@ -1,7 +1,7 @@
 *qnamebuf.txt*  QuickNameBuf: A quick buffer manager
 
 Author: Matt Spear <batman900 at gmail DOT com>
-QuickNameBuf version 0.02
+QuickNameBuf version 0.03
 
 ==============================================================================
 1. Overview~
@@ -94,6 +94,8 @@ consistent access.
 ==============================================================================
 6. History~
                                                  *qnamebuf-history*
+Version 0.03
+    - Mistake in always defining the <F4> mapping even if a map to QNameInit exists
 Version 0.02
     - Added support for <Leader>X as a synonym for <M-X> for |guioptions|+=m users
     - Some minor code cleanup

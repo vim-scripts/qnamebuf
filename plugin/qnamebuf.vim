@@ -2,7 +2,7 @@
 " File: qnamebuf.vim
 " Author: batman900 <batman900+vim@gmail.com>
 " Last Change: 23-Aug-2010.
-" Version: 0.01
+" Version: 0.03
 
 if v:version < 700
 	finish
@@ -17,7 +17,9 @@ if !exists("g:qnamebuf_hotkey") || g:qnamebuf_hotkey == ""
 	let g:qnamebuf_hotkey = "<F4>"
 endif
 
-exe "nmap" g:qnamebuf_hotkey ":call QNameBufInit(0, 0, 1, 0)<cr>:~"
+if !hasmapto('QNameBufInit')
+	exe "nmap <unique>" g:qnamebuf_hotkey ":call QNameBufInit(0, 0, 1, 0)<cr>:~"
+endif
 let s:qnamebuf_hotkey = eval('"\'.g:qnamebuf_hotkey.'"')
 let s:mapleader = exists('mapleader') ? mapleader : "\\"
 
