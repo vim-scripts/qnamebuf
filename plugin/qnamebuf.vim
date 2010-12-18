@@ -2,7 +2,7 @@
 " File: qnamebuf.vim
 " Author: batman900 <batman900+vim@gmail.com>
 " Last Change: 23-Aug-2010.
-" Version: 0.03
+" Version: 0.04
 
 if v:version < 700
 	finish
@@ -29,7 +29,7 @@ let s:mapleader = exists('mapleader') ? mapleader : "\\"
 " a:2 If should use the filename only or should use filename and path
 " a:3 If should let <LocalLeader>X to be a synonym for <M-X>
 function! QNameBufInit(regexp, ...)
-	cmap ~ call QNameBufRun()<CR>:~
+	cmap <silent> ~ call QNameBufRun()<CR>:~
 	let s:pro = "Prompt: "
 	let s:cmdh = &cmdheight
 	let s:unlisted = 1 - getbufvar("%", "&buflisted")
@@ -148,7 +148,7 @@ endfunc
 
 " Cleanup the plugin
 function! QNameBufUnload()
-	cmap ~ exe "cunmap \x7E"<cr>
+	cmap <silent> ~ exe "cunmap \x7E"<cr>
 	exe "set cmdheight=".s:cmdh
 endfunc
 
@@ -212,6 +212,7 @@ endfunc
 
 function! s:baselist()
 	let s:ls = []
+	let _y = @y
 	redir @y | silent ls! | redir END
 	let i = 1
 	for _line in split(@y,"\n")
@@ -241,6 +242,7 @@ function! s:baselist()
 			let i = i + 1
 		endif
 	endfor
+	let @y = _y
 endfunc
 
 " The maximum height of the buffer listing, if more will go into a multi-column listing
