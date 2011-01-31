@@ -2,7 +2,7 @@
 " File: qnamebuf.vim
 " Author: batman900 <batman900+vim@gmail.com>
 " Last Change: 23-Aug-2010.
-" Version: 0.04
+" Version: 0.05
 
 if v:version < 700
 	finish
@@ -39,6 +39,8 @@ function! QNameBufInit(regexp, ...)
 	let s:colPrinter.trow = 0
 	let s:fileName = 1
 	let s:useLeader = 0
+	let s:paste = &paste
+	set nopaste
 	if a:0 > 0
 		let s:colPrinter.trow = a:1
 	endif
@@ -78,18 +80,18 @@ function! QNameBufRun()
 		let s:unlisted = 1 - s:unlisted
 		call s:baselist()
 	elseif _key == "\<M-D>" || _key == "\<M-C>" || (s:inLeader && (_key == "d" || _key == "c"))
-		let _sel = s:colPrinter.sel
+		call extend(g:DEBUG, [_sel . " " . _len . " " . string(s:b[_sel])])
 		if _sel < _len && _sel >= 0
 			if _key == "\<M-D>" || _key == "d"
-				exe 'bd '.s:ls[_sel][3]
+				exe 'bd ' . s:b[_sel]
 			else
-				call s:closewindow(s:ls[_sel][3])
+				call s:closewindow(s:b[_sel])
 			endif
 			call s:baselist()
 			call s:build(_sel)
 		endif
 	elseif strlen(_key) == 1 && char2nr(_key) > 31 && !s:inLeader
-		let s:inp = s:inp._key
+		let s:inp = s:inp . _key
 	endif
 
 	if _key == "\<ESC>" || _key == s:qnamebuf_hotkey
@@ -150,12 +152,21 @@ endfunc
 function! QNameBufUnload()
 	cmap <silent> ~ exe "cunmap \x7E"<cr>
 	exe "set cmdheight=".s:cmdh
+	if s:paste
+		set paste
+	else
+		set nopaste
+	endif
 endfunc
 
 " build the list, showing a short version if the list is too long
 function! s:build(sel)
+	" The list of long names
 	let s:s = []
+	" The list of short names
 	let s:n = []
+	" The list of buffer numbers
+	let s:b = []
 	let s:blen = 0
 	if s:regexp
 		let _cmp = tolower(s:inp)
@@ -175,6 +186,7 @@ function! s:build(sel)
 			let _fill = repeat(' ', _align - len(_line[4]) - len(_line[0]) - len(_line[1]) - len(_line[2]) + (_line[3] < 10 ? 1 : 0) - (i < 10 ? 2 : 1))
 			call add(s:s, i._line[1]._sp._line[4].' '._line[2]._fill.'<'._line[3].'> '._line[5])
 			call add(s:n, _line[0]._sp._name)
+			call add(s:b, _line[3])
 			let i = i+1
 		endif
 	endfor

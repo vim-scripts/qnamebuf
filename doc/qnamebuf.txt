@@ -1,7 +1,7 @@
 *qnamebuf.txt*  QuickNameBuf: A quick buffer manager
 
 Author: Matt Spear <batman900 at gmail DOT com>
-QuickNameBuf version 0.04
+QuickNameBuf version 0.05
 
 ==============================================================================
 1. Overview~
@@ -94,6 +94,8 @@ consistent access.
 ==============================================================================
 6. History~
                                                  *qnamebuf-history*
+Version 0.05
+    - Fixed a bug which would cause operations to fail when filtered
 Version 0.04
     - Save and restore register |@y| instead of overwriting it
     - Made the |cmap|s <silent>
