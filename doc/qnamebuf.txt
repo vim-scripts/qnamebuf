@@ -1,7 +1,7 @@
 *qnamebuf.txt*  QuickNameBuf: A quick buffer manager
 
 Author: Matt Spear <batman900 at gmail DOT com>
-QuickNameBuf version 0.05
+QuickNameBuf version 0.06
 
 ==============================================================================
 1. Overview~
@@ -36,24 +36,16 @@ information:
     4) Buffer number
     5) Relative file path
 
-When Open:
-    <BS>  Delete last char entered
-    <C-U> Delete all entered chars
+
+Beyond the keybindinfs of |qnamepicker.txt| qnamefile provides:
     <M-L> Toggle between listed and unlisted buffers
     <M-D> Delete the selected buffer, the explorer stays open and
           retains cursor position
     <M-C> Close the window containing the buffer
-    <ESC> or <F4> close the explorer
-    <CR>  Open the selected file in the current window, if the file
-          is already open in a split move the cursor to that split
+    <ESC> or <F4> or <C-G> Close the buffer explorer
     <M-S> Open the selected file in a split window
     <M-V> Open the selected file in a vert split window
     <M-T> Open the selected file in a new tab
-    <UP> <DOWN> <LEFT> <RIGHT> Navigate the selection
-    <HOME> <END> Move to the first/last item
-    <M-1>, ..., <M-0> Open the first, ..., tenth file in the list
-
-Note, I wanted these to be <C-...> but <C-1>...<C-0> are not real key sequences.
 
 ==============================================================================
 3. Customization ~
@@ -71,6 +63,9 @@ If FILE_NAME_ONLY is false then use the path and filename otherwise just use
 the filename.  Defaults to true.
 If ALLOW_LEADER is true then <LEADER>X can be used instead of <M-X> in the
 list above.  Defaults to false.
+
+|g:qnamebuf_unlisted| If set will start in unlisted mode instead of the
+default (listed mode).
 
 ==============================================================================
 4. Hints ~
@@ -94,6 +89,13 @@ consistent access.
 ==============================================================================
 6. History~
                                                  *qnamebuf-history*
+Version 0.07
+    - Refactored to have a generic core and many wrappers
+    - Increased speed by changing from a custom function for matching to a
+      regular expression (achieves the same result, but is significantly
+      faster)
+Version 0.06
+    - Fixed a bug when switching between listed and unlisted
 Version 0.05
     - Fixed a bug which would cause operations to fail when filtered
 Version 0.04

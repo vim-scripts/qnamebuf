@@ -1,0 +1,98 @@
+*qnamefile.txt*  QuickNameBuf: A quick buffer manager
+
+Author: Matt Spear <batman900 at gmail DOT com>
+QNameFile version 0.07
+
+==============================================================================
+1. Overview~
+                                                *qnamefile-overview*
+
+After using qnamebuf for a while I noticed I wanted to be able to choose a
+file in a similar manner (by typing a non-).  After a refactoring of the
+qnamebuf code into a core module |qnamepicker| and modules, this became
+possible.
+
+==============================================================================
+2. Installation ~
+                                                 *qnamefile-installation*
+
+Extract the downloaded file in your personal |vimfiles| directory (~/.vim
+under Unix or %HOMEPATH%\vimfiles under Windows).  Restart Vim and execute:
+>
+          helptags ~/.vim/doc
+<
+
+Requires that there be a find utility available in the path.  This should be
+available on unix, on Windows GnuWin32 should be sufficient:
+http://gnuwin32.sourceforge.net/packages/findutils.htm
+
+==============================================================================
+2. Usage ~
+                                                 *qnamefile-usage*
+
+<S-F4> opens a listing of the files recursively from the current directory.
+By default the only files that are not shown are those that are hidden, or are
+in a hidden directory (e.g. .vimrc and anything in .vim/).  Typing a string
+filters the list (by default using an algorithm like lustyexplorer vimscript
+#1890).  All filtering is case insensitive.
+
+Beyond the keybindinfs of |qnamepicker.txt| qnamefile provides:
+    <M-V>  Opens the selected file in a vertical split
+    <M-S>  Opens the selected file in a split
+    <M-T>  Opens the selected file in a new tab
+    <C-G>  Cancels
+    <S-F4> Cancels
+
+==============================================================================
+3. Customization ~
+                                                 *qnamefile-customization*
+
+|g:qnamefile_hotkey| Set the default key to toggle qnamefile (defaults to <S-F4>).
+
+One can create a mapping using something like:
+>
+    nmap <unique> <KEY> :call QNameFileInit(PATH, EXTENSIONS,
+          INCLUDE_HIDDEN)<cr>:~
+<
+PATH specifies the path to start from, if it is |''| then it will default to
+the current working directory (see |:pwd|).
+EXTENSIONS is a space separated list of extensions to filter on (e.g. "h cpp
+cc cxx c"), if it is |''| then there will be no filtering.
+INCLUDE_HIDDEN if true will recurse into hidden directories, and show hidden
+files (i.e. files starting with .).
+
+|g:qnamefile_height| Controls the initial height of the window.
+
+|g:qnamefile_leader| If true then will allow <LEADER><KEY> instead of <M-KEY>
+in the mappings.
+
+|g:qnamefile_regexp| If true will use regular expressions instead of a lusty
+style selector.
+
+==============================================================================
+6. History~
+                                                 *qnamefile-history*
+Version 0.07
+    - Initial release
+
+==============================================================================
+7. Thanks~
+                                                 *qnamefile-thanks*
+
+- Vim Devs for vim
+
+==============================================================================
+8. Contact ~
+                                                 *qnamefile-contact*
+
+If you have questions, bug reports, suggestions, etc. the author can be
+contacted at batman900 AT gmail DOT com. The latest version is available at
+http://www.vim.org/scripts/script.php?script_id=3217.  If you like the script
+please vote for it on www.vim.org.
+
+==============================================================================
+License ~
+
+This software is licensed under the MIT license.
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:

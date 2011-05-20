@@ -1,0 +1,210 @@
+*qnamepicker.txt*  QuickNamePicker: A quick list selector library
+
+Author: Matt Spear <batman900 at gmail DOT com>
+QNamePicker version 0.07
+
+==============================================================================
+1. Overview~
+                                                *qnamepicker-overview*
+
+After using qnamebuf for a while I realized it would be useful to have a
+generic selector interface and to allow modules to build off this.  In this
+manner qnamebuf becomes an extension (and I introduced qnamefile).  The big
+driver for this was the Project plugin (vimscript #69) which I felt very much
+needed a lusty picker for the file to open.
+
+==============================================================================
+2. Installation ~
+                                                 *qnamepicker-installation*
+
+Extract the downloaded file in your personal |vimfiles| directory (~/.vim
+under Unix or %HOMEPATH%\vimfiles under Windows).  Restart Vim and execute:
+>
+          helptags ~/.vim/doc
+<
+==============================================================================
+2. Usage ~
+                                                 *qnamepicker-usage*
+
+This exposes one function for the user:
+>
+    QNamePickerStart(list, dict)
+<
+|a:list| is the |List| of items to have the user choose from.
+|a:dict| has the optional keys:
+    |acceptors| The set of additional keys to accept on.
+        By default has [<Enter>, <M-1>, ..., <M-0>].
+        e.g. "acceptors": ["\<M-D>", "\<C-T>", "\<M-L>"].
+    |cancelors| The set of keys to close the qnamepicker.
+        By default has <Esc>.
+        e.g. "cancelors": ["\<C-G>", "\<C-C>"]
+    |modifiers| The set of keys to call the modifier_func when pressed.
+        By default is empty.
+        e.g. "modifiers": ["\<M-L>"]
+    |modifier_func| The callback function to modify the list that is
+        displayed.  The callback is expected to return the new list to
+        display.  Called as:
+            modifier_func(|index|, |modifier_key|)
+        where
+            |a:index| is the index in |a:list| that is selected, if there is
+            no selected item then it will be -1 (this will happen if there are
+            no items in the filtered list).
+            |modifier_key| is the key that was pressed.
+    |render_func| The function to call to render each item.  The callback is
+        expected to return a string that represents what to show for each item
+        in the filtered |a:list|.  Called as:
+            render_func(|index|, |rel_index|, |length|, |in_column_mode|)
+        where
+            |a:index| is the index in |a:list| of the item to render.
+            |a:rel_index| is the relative index in the filtered list (so that
+            one can show the shortcut counts for the <M-1>... keys).
+            |a:length| is the number of items in the filtered list (so that
+            one can show more information if there are few enough items).
+            |a:in_column_mode| is true if there are more items than the size
+            of the window.
+    |complete_func| The function to call when an item is selected by one of
+        the |acceptors|.  Called as:
+            complete_func(|index|, |acceptor_key|)
+        where
+            |a:index| is the index in |a:index| of the selected item.
+            |a:acceptor_key| is the acceptor key that was pressed.
+    |regexp| If true then treats the user input as a regular expression.  If
+        false or not present, then will use a lusty-style selector.
+    |height| The height of the window.  If set to 0 or not present, will
+        default to one-half of |&lines|.
+    |use_leader| If true then any word characters ([a-zA-Z0-9]) in acceptors
+        or cancelors or modifiers will be accessable via <Leader><CHAR>.  When
+        false then any word characters are treated as user input (including
+        <Leader>).
+
+The default controls are:
+    <BS>  Delete last char entered
+    <C-U> Delete all entered chars
+    <ESC> Close the explorer
+    <CR>  Choose the currently selected file
+    <UP> <DOWN> <LEFT> <RIGHT> Navigate the selection
+    <HOME> <END> Move to the first/last item
+    <M-1>, ..., <M-0> Open the first, ..., tenth file in the list
+
+Note, I wanted these to be <C-...> but <C-1>...<C-0> are not real key sequences.
+
+Once a function has been written to use |QNamePickerInit| (say |MyQNameWrapper|), then one should add
+a mapping to call the wrapper via:
+>
+     nmap <unique> <KEY> :call MyQNameWrapper()<cr>:~
+<
+
+==============================================================================
+3. Customization ~
+                                                 *qnamepicker-customization*
+Every other line can be colored by highlighting |QNamePickerAlt|, e.g.
+>
+    hi QNamePickerAlt gui=NONE guibg=#222222
+<
+
+==============================================================================
+4. Example ~
+                                                 *qnamepicker-example*
+Included in this are two fairly comprehensive examples:
+    |qnamebuf| which shows how I used this core to interact with the set of
+        vim buffers.  This is very comprehensive and uses pretty much every
+        feature of |qnamepicker|.
+    |qnamefile| which shows the recursive set of files from a given path, and
+        restricting to a set of extensions.  This is a much simpler example,
+        only requiring a |complete_func| and custom |acceptors|/|cancelors| list.
+
+These (and the hint example below) should be sufficient to make use of the
+plugin.
+
+==============================================================================
+5. Hints ~
+                                                 *qnamepicker-hints*
+
+To plug this into the Project (vimscript #69) plugin one would add something
+like:
+>
+    function! LustyProjectFilePicker()
+        let s:sid = substitute(maparg('<Return>', 'n'), '.*\(<SNR>.\{-}\)_.*', '\1', '')
+        " As there may not have been a file opened in the project, if a CD is
+        " specified, then we should cd to it before showing the list so that
+        " the :. works as expected...all of this is to get to that
+        let cd_cmd = b:proj_cd_cmd
+        let infoline = {s:sid}_RecursivelyConstructDirectives(line('.'))
+        let home = {s:sid}_GetHome(infoline, '') . '/'
+        let c_d = {s:sid}_GetCd(infoline, home)
+        let abs = {s:sid}_IsAbsolutePath(home)
+        if c_d != '' && abs != 2
+            if match(g:proj_flags, '\CL') != -1
+                call {s:sid}_SetupAutoCommand(c_d)
+            endif
+            if !isdirectory(glob(c_d))
+                call confirm("From this fold's entry,\nCD=".'"'.c_d.'" is not a valid directory.', "&OK", 1)
+            else
+                silent exec cd_cmd.' '.c_d
+            endif
+        endif
+        let ofnames=split(Project_GetAllFnames(1, line("."), ",,"), ',,')
+        let g:cmd_arr = map(ofnames, "fnamemodify(v:val, ':.')")
+        call QNamePickerStart(g:cmd_arr, {
+                    \ "complete_func": function("LustyProjectFileCompletion"),
+                    \ "acceptors": ["v", "s", "t", "\<M-V>", "\<M-S>", "\<M-T>"],
+                    \ "use_leader": 1,
+                    \})
+    endfunction
+
+    function! LustyProjectFileCompletion(index, key)
+        let infoline = {s:sid}_RecursivelyConstructDirectives(line('.'))
+        if a:key == "\<M-V>" || a:key == "v"
+            call {s:sid}_OpenEntry2(line('.'), infoline, fnamemodify(g:cmd_arr[a:index], ':p'), 'vert sp')
+        elseif a:key == "\<M-S>" || a:key == "s"
+            call {s:sid}_OpenEntry2(line('.'), infoline, fnamemodify(g:cmd_arr[a:index], ':p'), 'sp')
+        elseif a:key == "\<M-T>" || a:key == "t"
+            call {s:sid}_OpenEntry2(line('.'), infoline, fnamemodify(g:cmd_arr[a:index], ':p'), 'tabe')
+        else
+            call {s:sid}_OpenEntry2(line('.'), infoline, fnamemodify(g:cmd_arr[a:index], ':p'), 'e')
+        endif
+    endfunction
+
+    nmap <buffer> <unique> <LocalLeader>a :call LustyProjectFilePicker()<cr>:~
+<
+to the .vimproject_mappings file.
+
+With this <M-V> will open the selected file in a vert split window, <M-S> will
+open it in a split window, <M-T> will open it in a new tab, and <CR> will open
+it in the last accessed window (this is accomplished by cheating and calling
+the |QNameFileCompletion| which is publically exposed from the |qnamefile|
+plugin).
+
+==============================================================================
+7. History~
+                                                 *qnamepicker-history*
+Version 0.07
+    - Initial release
+
+==============================================================================
+8. Thanks~
+                                                 *qnamepicker-thanks*
+
+- Vim Devs for vim
+- Stefano for finding that <M-X> doesn't work with the menu shown and an
+  initial documentation
+- Peter for a patch for fixing |@y| being overwritten and pointing out the cmap
+  noisiness
+- pal nart For the amazing qname and qbuf which were the inspiration and basis
+  for this
+
+==============================================================================
+9. Contact ~
+                                                 *qnamepicker-contact*
+
+If you have questions, bug reports, suggestions, etc. the author can be
+contacted at batman900 AT gmail DOT com. The latest version is available at
+http://www.vim.org/scripts/script.php?script_id=3217.  If you like the script
+please vote for it on www.vim.org.
+
+==============================================================================
+License ~
+
+This software is licensed under the MIT license.
+
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:

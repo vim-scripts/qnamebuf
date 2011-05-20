@@ -2,7 +2,15 @@ This is a mirror of http://www.vim.org/scripts/script.php?script_id=3217
 
 I really like qname (vimscript #2317) and qbuf (vimscript #1910) and decided that it would be nice to combine them.  The author recommended I upload under my name.
 
-Usage:
+Version 0.07 introduced a redesign, there are three files:
+1) qnamepicker: A core that provides a generic function other scripts can call to allow the user to select an item from a list in the command prompt (in a lusty fashion).
+2) qnamefile: Like command-t but in mostly pure vim (there is a requirement on the find utility).
+3) qnamebuf: The classic buffer selector as before.
+and there was a significant speedup by replacing a custom matcher function with a regular expression.
+
+Also in the documentation for qnamepicker I show how one can utilize the script for the project (vimscript #69) to provide a lusty selector for the files in the project (complete with the shortcuts below!).  I have found this to be a life-changing combination ;-).
+
+qnamebuf Usage:
 <F4> opens a list of the current buffers, and typing a string filters the list (by default ala lustyexplorer vimscript #1890).  All filtering is case insensitive (even if using Regular Expressions).  If there are many files open goes to a simplified view (just relative buffer number, and the filename with path), when filtered enough shows more information:
     1) Relative Buffer Number
     2) Current Buffer (%), Alternative Buffer (#), or if it is open in a visible split (=)
@@ -10,13 +18,19 @@ Usage:
     4) Buffer number
     5) Relative file path
 
-When Open:
-    <BS> Delete last char entered
-    <C-U> Delete all entered chars
+In addition to the common commands below, qnamebuf accepts:
     <M-L> Toggle between listed and unlisted buffers
     <M-D> bdelete the selected buffer, the explorer stays open and retains cursor position
     <M-C> Close the window containing the buffer
-    <ESC> or <F4> close the explorer
+    <F4>    Close the qnamebuf explorer
+
+qnamefile Usage:
+<S-F4> opens an explorer from the current working directory showing all files which are not in a hidden directory (one that starts with '.').  This script relies on the external find utility.
+
+Common shortcuts to qnamefile and qnamebuf:
+    <BS> Delete last char entered
+    <C-U> Delete all entered chars
+    <ESC> or <C-G> close the explorer
     <CR> Open the selected file in the current window
     <M-S> Open the selected file in a split window
     <M-V> Open the selected file in a vert split window
@@ -27,13 +41,13 @@ When Open:
 
 Note, I wanted these to be <C-...> but <C-1>...<C-0> are not real key sequences.
 
+qnamepicker Usage:
+See the documentation for a detailed description of how to call the function, and examples.  Essentially provides a function:
+    QNamePickerStart(list, dict)
+where a:list is the set of items, and a:dict provides a mechanism to customize various parts (e.g. rendering, extra keys for various actions, etcetera).
+
 Customization:
-    g:qnamebuf_hotkey  Set the default key to toggle qnamebuf (defaults to <F4>)
-    nmap <KEY> :call QNameBufInit(REGEXP, [SIZE], [FILE_NAME_ONLY], [ALLOW_LEADER])<cr>:~
-If REGEXP is true use regular expressions instead of the lusty filter.
-SIZE controls the size of the popup. Defaults to 1/2 of the visible lines (|&lines|/2).
-If FILE_NAME_ONLY is false then use the path and filename otherwise just use the filename.  Defaults to true.
-If ALLOW_LEADER is true then <LEADER>X can be used as a synonym of <M-X> in the list above.  Defaults to false.
+qnamebuf and qnamefile can be customized (in slightly different manners).  See the documentation for details on these.
 
 Hints:
 I find the following mappings very useful (jump to the ith file):
@@ -47,4 +61,6 @@ I find the following mappings very useful (jump to the ith file):
     nmap <silent> <M-8> :brewind \| 7bn<CR>
     nmap <silent> <M-9> :brewind \| 8bn<CR>
     nmap <silent> <M-0> :brewind \| 9bn<CR>
-When starting qnamebuf the numbers are displayed and this allows consistant access.
+When starting qnamebuf the numbers are displayed and this allows consistent access.
+
+Also be sure to check the hints section of qnamepicker's documentation for some code to add to .vimproject_mappings to provide a lusty picker for the files in a project (it is slightly too long to be useful here)!
