@@ -179,6 +179,8 @@ function! s:QNamePickerUnload()
 	unlet s:indices
 	unlet s:colPrinter.rows
 	unlet s:colPrinter.cols
+	unlet s:modifier_func
+	unlet s:render_func
 endfunction
 
 " Essentially an identity function
@@ -198,6 +200,7 @@ endfunction
 function! s:Finish(item, keypressed)
 	call s:QNamePickerUnload()
 	call s:complete_func(a:item, a:keypressed)
+	unlet s:complete_func
 endfunction
 
 " Restricts the set of indices to the set that match the query
