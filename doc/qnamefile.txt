@@ -1,7 +1,7 @@
 *qnamefile.txt*  QuickNameBuf: A quick buffer manager
 
 Author: Matt Spear <batman900 at gmail DOT com>
-QNameFile version 0.07
+QNameFile version 0.08
 
 ==============================================================================
 1. Overview~
@@ -55,7 +55,8 @@ One can create a mapping using something like:
           INCLUDE_HIDDEN)<cr>:~
 <
 PATH specifies the path to start from, if it is |''| then it will default to
-the current working directory (see |:pwd|).
+the current working directory (see |:pwd|), if it is '%' then will default to
+the directory of the currently open file.
 EXTENSIONS is a space separated list of extensions to filter on (e.g. "h cpp
 cc cxx c"), if it is |''| then there will be no filtering.
 INCLUDE_HIDDEN if true will recurse into hidden directories, and show hidden
@@ -64,7 +65,9 @@ files (i.e. files starting with .).
 |g:qnamefile_height| Controls the initial height of the window.
 
 |g:qnamefile_leader| If true then will allow <LEADER><KEY> instead of <M-KEY>
-in the mappings.
+in the mappings.  Defaults to true.
+
+See |qnamepicker.txt| for additional key bindings and options.
 
 |g:qnamefile_regexp| If true will use regular expressions instead of a lusty
 style selector.
@@ -72,6 +75,9 @@ style selector.
 ==============================================================================
 6. History~
                                                  *qnamefile-history*
+Version 0.08
+    - Fix hidden file matching
+    - Add an option for path to be % to use the current file's path
 Version 0.07
     - Initial release
 

@@ -1,7 +1,7 @@
 *qnamepicker.txt*  QuickNamePicker: A quick list selector library
 
 Author: Matt Spear <batman900 at gmail DOT com>
-QNamePicker version 0.07
+QNamePicker version 0.08
 
 ==============================================================================
 1. Overview~
@@ -85,6 +85,9 @@ The default controls are:
     <UP> <DOWN> <LEFT> <RIGHT> Navigate the selection
     <HOME> <END> Move to the first/last item
     <M-1>, ..., <M-0> Open the first, ..., tenth file in the list
+    <C-P>  Move to the previous search item in the history
+    <C-N>  Move to the next
+    <C-R>  Toggle matching by regular expression
 
 Note, I wanted these to be <C-...> but <C-1>...<C-0> are not real key sequences.
 
@@ -101,6 +104,8 @@ Every other line can be colored by highlighting |QNamePickerAlt|, e.g.
 >
     hi QNamePickerAlt gui=NONE guibg=#222222
 <
+|g:qnamepicker_ignore_case| if true will match ignoring the case of the items.
+Defaults true true.
 
 ==============================================================================
 4. Example ~
@@ -178,6 +183,11 @@ plugin).
 ==============================================================================
 7. History~
                                                  *qnamepicker-history*
+Version 0.08
+    - Add an ignorecase option (|g:qnamepicker_ignore_case|) (patch by Josh Holtrop)
+    - Add a history of size 9 traversed by <C-P>/<C-N>
+    - Changed the prompt to show the current matching mode
+    - Add <C-R> to toggle regexp matching
 Version 0.07
     - Initial release
 
@@ -185,6 +195,7 @@ Version 0.07
 8. Thanks~
                                                  *qnamepicker-thanks*
 
+- Josh Holtrop for adding support for ignorecase
 - Vim Devs for vim
 - Stefano for finding that <M-X> doesn't work with the menu shown and an
   initial documentation

@@ -1,8 +1,8 @@
 "=============================================================================
 " File: qnamefile.vim
 " Author: batman900 <batman900+vim@gmail.com>
-" Last Change: 5/12/2011
-" Version: 0.07
+" Last Change: 7/20/2013
+" Version: 0.08
 
 if v:version < 700
 	finish
@@ -24,27 +24,32 @@ endif
 let s:qnamefile_hotkey = eval('"\' . g:qnamefile_hotkey . '"')
 
 let g:qnamefile_height = 0
-let g:qnamefile_leader = 0
+let g:qnamefile_leader = 1
 let g:qnamefile_regexp = 0
 
 " Find all files from path of the given extension ignoring hidden files
-" a:path Where to start searching from
-" a:extensions A space separated list of extensions to filter on (e.g. "java cpp h")
+" a:path Where to start searching from, if is % will use the current
+" file's directory
+" a:extensions A space separated list of extensions to filter on (e.g. '\.java \.cpp \.h README')
+" a:include_hidden if true will inclued hidden files
 function! QNameFileInit(path, extensions, include_hidden)
 	let path = a:path
-	if !path
+	if path == ''
 		let path = '.'
 	endif
+	if path == '%'
+		let path = expand('%:h')
+	endif
 	let ext = ''
-	if a:extensions
+	if a:extensions != ''
 		let ext = join(split(a:extensions, ' '), '\|')
-		let ext = '-and -regex ".*/.*\.\(' . ext . '\)"'
+		let ext = '-and -regex ".*/.*\(' . ext . '\)"'
 	endif
 	let hidden = ''
 	if !a:include_hidden
 		let hidden = '-not -regex ".*/\..*"'
 	endif
-	let ofnames = sort(split(system('find ' . a:path . ' -type f ' . hidden . ' ' . ext . ' -print'), "\n"))
+	let ofnames = sort(split(system('find ' . path . ' -type f ' . hidden . ' ' . ext . ' -print'), "\n"))
 	let g:cmd_arr = map(ofnames, "fnamemodify(v:val, ':.')")
 	call QNamePickerStart(g:cmd_arr, {
 				\ "complete_func": function("QNameFileCompletion"),

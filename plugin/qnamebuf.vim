@@ -1,8 +1,8 @@
 "=============================================================================
 " File: qnamebuf.vim
 " Author: batman900 <batman900+vim@gmail.com>
-" Last Change: 5/12/2011
-" Version: 0.07
+" Last Change: 7/20/2013
+" Version: 0.08
 
 if v:version < 700
 	finish
@@ -32,7 +32,7 @@ function! QNameBufInit(regexp, ...)
 	call QNamePickerStart(name_arr, {
 				\ "render_func": function("QNameBufRender"),
 				\ "complete_func": function("QNameBufCompletion"),
-				\ "modifiers": ["l", "d", "c", "\<M-l>", "\<M-d>", "\<M-c>"],
+				\ "modifiers": ["l", "d", "c", "p", "\<M-l>", "\<M-d>", "\<M-c>", "\<M-p>"],
 				\ "modifier_func": function("QNameBufModifier"),
 				\ "acceptors": ["v", "s", "t", "\<M-v>", "\<M-s>", "\<M-t>"],
 				\ "cancelors": ["g", "\<C-g>", s:qnamebuf_hotkey],
@@ -45,6 +45,8 @@ endfunction
 function! QNameBufModifier(index, key)
 	if a:key == "l" || a:key == "\<M-l>"
 		let s:unlisted = 1 - s:unlisted
+	elseif a:key == "p" || a:key == "\<M-p>"
+		let s:fileName = !s:fileName
 	elseif a:key == "d" || a:key == "\<M-d>" && a:index >= 0
 		exe 'bd ' . g:cmd_arr[a:index]['bno']
 	elseif a:key == "c" || a:key == "\<M-c>" && a:index >= 0

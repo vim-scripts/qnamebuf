@@ -1,7 +1,7 @@
 *qnamebuf.txt*  QuickNameBuf: A quick buffer manager
 
 Author: Matt Spear <batman900 at gmail DOT com>
-QuickNameBuf version 0.06
+QuickNameBuf version 0.08
 
 ==============================================================================
 1. Overview~
@@ -37,8 +37,9 @@ information:
     5) Relative file path
 
 
-Beyond the keybindinfs of |qnamepicker.txt| qnamefile provides:
+Beyond the keybindinfs of |qnamepicker.txt| qnamebuf provides:
     <M-L> Toggle between listed and unlisted buffers
+    <M-P> Toggles including the path in filtering
     <M-D> Delete the selected buffer, the explorer stays open and
           retains cursor position
     <M-C> Close the window containing the buffer
@@ -89,6 +90,8 @@ consistent access.
 ==============================================================================
 6. History~
                                                  *qnamebuf-history*
+Version 0.08
+    - Add <M-P> to toggle path inclusion
 Version 0.07
     - Refactored to have a generic core and many wrappers
     - Increased speed by changing from a custom function for matching to a

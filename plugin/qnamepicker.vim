@@ -1,8 +1,8 @@
 "=============================================================================
 " File: qnamepicker.vim
 " Author: batman900 <batman900+vim@gmail.com>
-" Last Change: 5/12/2011
-" Version: 0.07
+" Last Change: 7/20/2013
+" Version: 0.08
 
 if v:version < 700
 	finish
@@ -13,8 +13,10 @@ if exists("g:qnamepicker_loaded") && g:qnamepicker_loaded
 endif
 let g:qnamepicker_loaded = 1
 
+let g:qnamepicker_ignore_case = 1
 let s:colPrinter = {"trow": 20}
 let s:mapleader = exists('mapleader') ? mapleader : "\\"
+let s:history = []
 
 " Start the list picker
 " a:list is the set of items to choose from
@@ -45,6 +47,7 @@ let s:mapleader = exists('mapleader') ? mapleader : "\\"
 function! QNamePickerStart(list, dict)
 	let s:cmdh = &cmdheight
 	let s:inp = ""
+	let s:hist_index = -1
 	let s:colPrinter.trow = 0
 	let s:colPrinter.sel = 0
 	let s:inLeader = 0
@@ -90,6 +93,10 @@ function! QNamePickerStart(list, dict)
 	cmap <silent> ~ call QNamePickerRun()<CR>:~
 	let s:origList = a:list
 	let s:indices = range(0, len(s:origList) - 1)
+	" TODO(batz): maybe support marking (C-z) and then applying an
+	" operation to the marked items:
+	" * Need to have a list of marked_indices
+	" * Need to modify all modifiers/acceptors/... to take a list of items instead
 	call s:colPrinter.put(s:indices, 0)
 	exe "set cmdheight=" . (min([s:colPrinter.trow, len(s:origList)]) + 1)
 endfunction
@@ -101,7 +108,7 @@ function! QNamePickerRun()
 	let _len = len(s:indices)
 	call s:colPrinter.print()
 	call inputsave()
-	echo "\rMatch " . _len . '/' . len(s:origList) . ' names: ' . s:inp
+	echo "\r" . (s:regexp ? "Regex " : "Fuzzy ") . _len . '/' . len(s:origList) . ' names: ' . s:inp
 	let _key = getchar()
 	if !type(_key)
 		let _key = nr2char(_key)
@@ -152,6 +159,30 @@ function! QNamePickerRun()
 		let s:colPrinter.sel = 0
 	elseif _key == "\<End>"
 		let s:colPrinter.sel = _len-1
+	elseif _key == "\<C-R>" || _key == "\<M-R>"
+		let s:regexp = !s:regexp
+		if s:colPrinter.sel < 0 | let s:colPrinter.sel = 0 | endif
+		let s:indices = range(0, len(s:origList)-1)
+		call s:FilterList()
+	elseif _key == "\<C-P>"
+		let s:indices = range(0, len(s:origList) - 1)
+		if s:hist_index < len(s:history) - 1
+			let s:hist_index += 1
+		endif
+		if s:hist_index != -1
+			let s:inp = s:history[s:hist_index]
+		endif
+		call s:FilterList()
+	elseif _key == "\<C-N>"
+		let s:indices = range(0, len(s:origList) - 1)
+		if s:hist_index > 0
+			let s:hist_index -= 1
+			let s:inp = s:history[s:hist_index]
+		else
+			let s:hist_index = -1
+			let s:inp = ""
+		endif
+		call s:FilterList()
 	elseif strlen(_key) == 1 && char2nr(_key) > 31
 		let s:inp = s:inp . _key
 		if _len == 0 " NOTE for s:regexp it may reach 0 b/c of an invalid regexp instead of there being no real matches
@@ -196,6 +227,10 @@ endfunction
 
 " The actual finish function, called when an acceptors is pressed.
 function! s:Finish(item, keypressed)
+	if len(s:inp) > 0 && index(s:history, s:inp) == -1
+		call insert(s:history, s:inp, 0)
+		let s:history = s:history[0:9] " only remember the last 10 entries
+	endif
 	call s:QNamePickerUnload()
 	call s:complete_func(a:item, a:keypressed)
 endfunction
@@ -204,20 +239,23 @@ endfunction
 " (using the original list as the strings)
 function! s:FilterList()
 	if len(s:inp) > 0
-		let query = tolower(s:inp)
+		let query = s:inp
 		if !s:regexp
 			let query = join(split(query, '\zs'), '.*')
 			let query = substitute(query, "\\", "\\\\", "g")
 			let query = substitute(query, "\\.\\.", "\\\\..", "g")
 		endif
+		let sic = &ignorecase
+		let &ignorecase = g:qnamepicker_ignore_case
 		let s:indices = filter(s:indices, "s:origList[v:val] =~ '" . query . "'")
+		let &ignorecase = sic
 	endif
 	call s:colPrinter.put(s:indices, s:colPrinter.sel)
 endfunction
 
 " Checks if the character is [a-zA-Z0-9]
 function! s:IsPrintable(key)
-	return ("a" <= a:key && a:key <= "z") || ("A" <= a:key && a:key <= "Z") || ("0" <= a:key && a:key <= "9")
+	return (char2nr("a") <= char2nr(a:key) && char2nr(a:key) <= char2nr("z")) || (char2nr("A") <= char2nr(a:key) && char2nr(a:key) <= char2nr("Z")) || (char2nr("0") <= char2nr(a:key) && char2nr(a:key) <= char2nr("9"))
 endfunction
 
 " Checks if the key pressed is present in the array given, taking into account
